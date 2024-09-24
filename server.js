@@ -1,9 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
 import contactRoute from "./routes/contact.route.js";
+import userRoute from "./routes/user.route.js";
 import { errorHandler } from "./middleware/errorhandler.js";
 import connectDB from "./utils/db.js";
-import cors from "cors"
+import cors from "cors";
 
 dotenv.config({});
 
@@ -14,6 +15,7 @@ app.use(errorHandler);
 app.use(cors());
 
 app.use("/api/contacts", contactRoute);
+app.use("/api/users", userRoute);
 
 app.listen(port, () => {
   connectDB();
