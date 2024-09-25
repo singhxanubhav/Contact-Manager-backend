@@ -48,18 +48,43 @@ const registerUser = asyncHandler(async (req, res) => {
 // Access Public
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
+
+  // Check if email and password are provided
   if (!email || !password) {
     res.status(400);
-    throw new Error("All field are required");
+    throw new Error("All fields are required");
   }
 
+  // Find the user by email
   const user = await User.findOne({ email });
-  res.json({ register: "login user" });
+
+  // Compare the provided password with the hashed password
+  if (user && (await bcrypt.compare(password, user.password))) {
+    // Generate access token
+    const accessToken = Jwt.sign(
+      {
+        user: {
+          username: user.username,
+          email: user.email,
+          id: user.id,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECERT, // Correct the typo
+      { expiresIn: "5m" } // Token expires in 2 minutes
+    );
+
+    // Send the access token in response
+    res.status(200).json({ accessToken });
+  } else {
+    // If user is not found or password is incorrect
+    res.status(401);
+    throw new Error("Email or password is not valid");
+  }
 });
 
 // Access Private
 const currentUser = asyncHandler(async (req, res) => {
-  res.json({ register: "Current the user information" });
+  res.json(req.user);
 });
 
 export { registerUser, loginUser, currentUser };
